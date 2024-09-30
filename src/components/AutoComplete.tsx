@@ -1,7 +1,7 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/react-dom';
 
-interface AutocompleteProps<T> {
+interface AutocompleteProps<T extends object | string> {
     description: string;
     disabled: boolean;
     filterOptions?: (options: Array<T>, inputValue: string) => Array<T>;
@@ -14,11 +14,10 @@ interface AutocompleteProps<T> {
     placeholder: string;
     renderOption?: (option: T) => React.ReactNode;
     value: T | Array<T>;
-  }
-  
-  
+}
+   
 
-const Autocomplete  =<T,> ({ 
+const Autocomplete  =<T extends object | string,> ({ 
     description, 
     disabled, 
     filterOptions, 
@@ -32,18 +31,63 @@ const Autocomplete  =<T,> ({
     renderOption, 
     value 
   }: AutocompleteProps<T>) : JSX.Element =>  {
-    const [inputValue, setInputValue] = useState('');  
     const [isOpen, setIsOpen] = useState(false);
+    const [inputWidth, setInputWidth] = useState<number | null>(null);
+    const [selected, setSelected] = useState<T | T[]>(value);
+    const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
 
-    const { x, y, refs, strategy, update } = useFloating({
+    const { x, y, refs, strategy } = useFloating({
         placement: 'bottom-start', // Position the floating UI below the input
-        middleware: [offset(4), flip(), shift()],
+        middleware: [offset(0), flip(), shift()],
         whileElementsMounted: autoUpdate,
-      });
+    });
 
-      const handleOptionClick = (option : any) => {
-        console.log(option);
-      }
+    const handleOptionClick = (option : T) => {
+        if (multiple) { // we assume when people put multiple, it is actually multiple
+            const previousSelected : T[] = selected as T[];
+            if (previousSelected.includes(option)){
+                setSelected(previousSelected.filter(current =>
+                        current === option
+                    )
+                );
+            } else {
+                setSelected([...previousSelected,option]);
+            }
+        } else {
+            setSelected(option);
+        }
+        //upadate global variable
+        onChange(selected);  
+    }
+
+    const handleInputChange = (e : React.ChangeEvent<HTMLInputElement> )  => {
+        const inputValue = e.target.value;
+        if (filterOptions) {
+            setFilteredOptions(filterOptions(options,inputValue))
+        } else {
+            setFilteredOptions(options.filter(item => {
+                let displayedString : string;
+                if (typeof item === 'string') {
+                    displayedString = item;
+                } else {
+                    displayedString = item.toString();
+                }
+                let lth : number = inputValue.length;
+                return displayedString.substring(0,lth) === inputValue;
+            }));
+        }
+        onInputChange(inputValue);
+    }
+
+    useEffect(() => {
+        if (refs.reference.current) {
+            const referenceElement = refs.reference.current as HTMLInputElement;
+            const width = referenceElement.clientWidth;
+            setInputWidth(width);
+        }
+    }, [refs.reference.current, isOpen]); // Make sure this runs when the input ref changes or when `isOpen` changes
+
+    
   
     return (
         <div className = "container flex flex-col bg-white justify-between mx-auto mt-64 px-2 py-5 rounded-md max-w-64">    
@@ -55,24 +99,36 @@ const Autocomplete  =<T,> ({
             placeholder= {placeholder} 
             onFocus={()=>setIsOpen(true)} 
             onBlur={()=>setIsOpen(false)} 
+            onChange={(e) => handleInputChange(e)}
             ref = {refs.setReference}
             />
             {/* Floating element */}
-            {isOpen && options.length > 0 && (
+            {isOpen && (
+                
                 <div
                 ref={refs.setFloating}
                 style={{
                     position: strategy,
                     top: y ?? 0,
                     left: x ?? 0,
+                    width: inputWidth ? `${inputWidth}px` : '240px',
                 }}
                 className="absolute min-w-60 z-50 bg-white border border-gray-300 shadow-lg rounded-md mt-1 p-2"
                 >
-                {options.map((option, index) => (
+                {(filteredOptions? filteredOptions.length === 0 : false) && (
+                    <div
+                    className="p-2 hover:bg-blue-100 cursor-pointer rounded"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
+                    >
+                        No match detected.
+                    </div>
+                )}
+                {filteredOptions.map((option, index) => (
                     <div
                     key={index}
                     className="p-2 hover:bg-blue-100 cursor-pointer rounded"
                     onClick={() => handleOptionClick(option)}
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
                     >
                     {renderOption ? renderOption(option) : 'option.toString()'}
                     </div>
