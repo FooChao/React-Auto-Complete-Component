@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState} from 'react'
 
 interface AutocompleteProps<T> {
     description: string;
@@ -31,11 +31,10 @@ const Autocomplete  =<T,> ({
     renderOption, 
     value 
   }: AutocompleteProps<T>) : JSX.Element =>  {
-  useState  
   return (
     <div className = "container flex flex-col bg-white justify-between mx-auto mt-64 px-2 py-5 rounded-md max-w-64">    
         <h1 className='bg-white mx-0'> {description} </h1>        
-        <input type='text' className='mx-0 border-gray-300 border-2 rounded-md ' placeholder= {placeholder}/>
+        <input type='text' className= 'mx-0 border-gray-300 border-2 rounded-md' disabled = {disabled} placeholder= {placeholder} />
         <h1 className='bg-white'> {label} </h1>
     </div>
   )
