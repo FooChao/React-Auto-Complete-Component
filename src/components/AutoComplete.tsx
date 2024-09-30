@@ -48,7 +48,15 @@ const Autocomplete  =<T,> ({
     return (
         <div className = "container flex flex-col bg-white justify-between mx-auto mt-64 px-2 py-5 rounded-md max-w-64">    
             <h1 className='bg-white mx-0'> {description} </h1>        
-            <input type='text' className= 'mx-0 border-gray-300 border-2 rounded-md' disabled = {disabled} placeholder= {placeholder} onFocus={()=>setIsOpen(true)} ref = {refs.setReference}/>
+            <input 
+            type='text' 
+            className= 'mx-0 border-gray-300 border-2 rounded-md' 
+            disabled = {disabled} 
+            placeholder= {placeholder} 
+            onFocus={()=>setIsOpen(true)} 
+            onBlur={()=>setIsOpen(false)} 
+            ref = {refs.setReference}
+            />
             {/* Floating element */}
             {isOpen && options.length > 0 && (
                 <div

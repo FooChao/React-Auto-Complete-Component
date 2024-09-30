@@ -19,7 +19,7 @@ const App = () => {
   let placeholder : string = "Type to begin seaching";
   // renderoption is optional so will not include
   let renderOption = (option : any) : JSX.Element => {
-    return <div>Hi</div>;
+    return <div>{option}</div>;
   }
   let value : string[] = ["aa"];
 
