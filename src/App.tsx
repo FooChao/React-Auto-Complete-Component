@@ -1,4 +1,3 @@
-import React from 'react';
 import Autocomplete from './components/AutoComplete';
 
 const App = () => {
@@ -11,9 +10,11 @@ const App = () => {
   let multiple : boolean = true;
   let onChange = (value: any | Array<any>) : void => {
     //either change global variable or link to backend
+    console.log(value);
   };
   let onInputChange = (inputValue : String) : void => {
     //either change global variable or link to backend
+    console.log(inputValue);
   };
   let options : string[] = ["aa", "ab", "b", "c"];
   let placeholder : string = "Type to begin seaching";
