@@ -36,7 +36,7 @@ const Autocomplete  =<T extends object | string,> ({
   }: AutocompleteProps<T>) : JSX.Element =>  {
     const [isOpen, setIsOpen] = useState(false);
     const [inputWidth, setInputWidth] = useState<number | null>(null);
-    const [selected, setSelected] = useState<T | T[]>(Array.isArray(value) ? value : [value]);
+    const [selected, setSelected] = useState<T[]>(Array.isArray(value) ? value : [value]);
     const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -51,17 +51,21 @@ const Autocomplete  =<T extends object | string,> ({
             const previousSelected : T[] = selected as T[];
             if (previousSelected.includes(option)){
                 setSelected(previousSelected.filter(current =>
-                        current === option
+                        current !== option
                     )
                 );
             } else {
                 setSelected([...previousSelected,option]);
+                
             }
+            //upadate global variable
+            onChange(selected);  
         } else {
-            setSelected(option);
+            setSelected([option]);
+            //upadate global variable
+            onChange(option);  
         }
-        //upadate global variable
-        onChange(selected);  
+        
     }
 
     let handler : number | undefined;
@@ -82,6 +86,9 @@ const Autocomplete  =<T extends object | string,> ({
             setFilteredOptions(filterOptions(options,inputValue))
         } else {
             setFilteredOptions(options.filter(item => {
+                if (inputValue === "") {
+                    return false;
+                }
                 let displayedString : string;
                 if (typeof item === 'string') {
                     displayedString = item;
@@ -92,7 +99,9 @@ const Autocomplete  =<T extends object | string,> ({
             }));
         }
         onInputChange(inputValue);
-        setIsLoading(false);
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 100);
     }
 
     useEffect(() => {
@@ -156,12 +165,18 @@ const Autocomplete  =<T extends object | string,> ({
                 {filteredOptions.map((option, index) => (
                     <div
                     key={index}
-                    className="p-2 hover:bg-blue-100 cursor-pointer rounded"
+                    className={selected.includes(option) ? "p-2 hover:bg-blue-100 bg-green-300 cursor-pointer rounded flex flex-row" : "p-2 hover:bg-blue-100 cursor-pointer rounded flex flex-row"}
                     onClick={() => handleOptionClick(option)}
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
                     >
-                    {renderOption ? renderOption(option) : 'option.toString()'}
-
+                        <input
+                            type="checkbox"
+                            checked={selected.includes(option) }
+                            className="h-4 w-4 my-auto mr-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <h1 className='my-auto'>
+                            {renderOption ? renderOption(option) : 'option.toString()'}
+                        </h1>                     
                     </div>
                 
                 ))}
