@@ -17,9 +17,8 @@ const App = () => {
   };
   let options : string[] = ["aa", "ab", "b", "c"];
   let placeholder : string = "Type to begin seaching";
-  // renderoption is optional so will not include
   let renderOption = (option : any) : JSX.Element => {
-    return <div>{option}</div>;
+    return <div my-auto>{option}</div>;
   }
   let value : string[] = ["aa"];
 

@@ -165,18 +165,20 @@ const Autocomplete  =<T extends object | string,> ({
                 {filteredOptions.map((option, index) => (
                     <div
                     key={index}
-                    className={selected.includes(option) ? "p-2 hover:bg-blue-100 bg-green-300 cursor-pointer rounded flex flex-row" : "p-2 hover:bg-blue-100 cursor-pointer rounded flex flex-row"}
+                    className="p-2 hover:bg-blue-100 cursor-pointer rounded flex flex-row"
                     onClick={() => handleOptionClick(option)}
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
                     >
                         <input
                             type="checkbox"
                             checked={selected.includes(option) }
-                            className="h-4 w-4 my-auto mr-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            className="h-4 w-4 my-auto mr-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
-                        <h1 className='my-auto'>
-                            {renderOption ? renderOption(option) : 'option.toString()'}
-                        </h1>                     
+                        
+                            {renderOption 
+                                ? renderOption(option) 
+                                : (typeof option === "string" ? <h1 className='my-auto'>{option}</h1> : <h1 className='my-auto'>{option.toString()}</h1>)}
+                                           
                     </div>
                 
                 ))}
