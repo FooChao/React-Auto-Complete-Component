@@ -10,7 +10,6 @@ interface AutocompleteProps<T extends object | string> {
     disabled: boolean;
     filterOptions?: (options: Array<T>, inputValue: string) => Array<T>;
     label: string;
-    loading: boolean;
     multiple: boolean;
     onChange: (value: T | Array<T>) => void;
     onInputChange: (inputValue: string) => void;
