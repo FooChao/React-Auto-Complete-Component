@@ -38,7 +38,7 @@ const Autocomplete  =<T extends object | string,> ({
     const [inputWidth, setInputWidth] = useState<number | null>(null);
     const [selected, setSelected] = useState<T | T[]>(Array.isArray(value) ? value : [value]);
     const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const { x, y, refs, strategy } = useFloating({
         placement: 'bottom-start', // Position the floating UI below the input
@@ -64,8 +64,20 @@ const Autocomplete  =<T extends object | string,> ({
         onChange(selected);  
     }
 
+    let handler : number | undefined;
+
     const handleInputChange = (e : React.ChangeEvent<HTMLInputElement> )  => {
+        if (handler) {
+            clearTimeout(handler);
+            setIsLoading(false)
+        } 
         const inputValue = e.target.value;
+        handler = setTimeout(() => handleInputChangeHelper(inputValue) , 1000);
+        
+    }
+
+    const handleInputChangeHelper = (inputValue : string)  => {
+        setIsLoading(true);
         if (filterOptions) {
             setFilteredOptions(filterOptions(options,inputValue))
         } else {
@@ -75,12 +87,12 @@ const Autocomplete  =<T extends object | string,> ({
                     displayedString = item;
                 } else {
                     displayedString = item.toString();
-                }
-                let lth : number = inputValue.length;
-                return displayedString.substring(0,lth) === inputValue;
+                }                
+                return displayedString.startsWith(inputValue);
             }));
         }
         onInputChange(inputValue);
+        setIsLoading(false);
     }
 
     useEffect(() => {
