@@ -1,5 +1,9 @@
 import React, { useState, useEffect} from 'react';
 import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/react-dom';
+import { ClipLoader } from 'react-spinners';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons'; // Import the search icon
+
 
 interface AutocompleteProps<T extends object | string> {
     description: string;
@@ -22,7 +26,6 @@ const Autocomplete  =<T extends object | string,> ({
     disabled, 
     filterOptions, 
     label, 
-    loading, 
     multiple, 
     onChange, 
     onInputChange, 
@@ -33,8 +36,9 @@ const Autocomplete  =<T extends object | string,> ({
   }: AutocompleteProps<T>) : JSX.Element =>  {
     const [isOpen, setIsOpen] = useState(false);
     const [inputWidth, setInputWidth] = useState<number | null>(null);
-    const [selected, setSelected] = useState<T | T[]>(value);
+    const [selected, setSelected] = useState<T | T[]>(Array.isArray(value) ? value : [value]);
     const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { x, y, refs, strategy } = useFloating({
         placement: 'bottom-start', // Position the floating UI below the input
@@ -91,17 +95,31 @@ const Autocomplete  =<T extends object | string,> ({
   
     return (
         <div className = "container flex flex-col bg-white justify-between mx-auto mt-64 px-2 py-5 rounded-md max-w-64">    
-            <h1 className='bg-white mx-0'> {description} </h1>        
-            <input 
-            type='text' 
-            className= 'mx-0 border-gray-300 border-2 rounded-md' 
-            disabled = {disabled} 
-            placeholder= {placeholder} 
-            onFocus={()=>setIsOpen(true)} 
-            onBlur={()=>setIsOpen(false)} 
-            onChange={(e) => handleInputChange(e)}
-            ref = {refs.setReference}
-            />
+            <h1 className='bg-white mx-0'> {description} </h1>
+            <div className='relative flex items-center'>
+                <input 
+                type='text' 
+                className= 'mx-0 border-gray-300 border-2 rounded-md px-3 py-2 w-full pl-8' 
+                disabled = {disabled} 
+                placeholder= {placeholder} 
+                onFocus={()=>setIsOpen(true)} 
+                onBlur={()=>setIsOpen(false)} 
+                onChange={(e) => handleInputChange(e)}
+                ref = {refs.setReference}
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                <FontAwesomeIcon icon={faSearch} />
+                </div>
+                {/* Show loading spinner conditionally */}
+                {isLoading && (
+                    <div className="absolute right-2">
+                    <ClipLoader size={20} color={"#123abc"} loading={isLoading} />
+                    </div>
+                )}
+            
+        
+            </div>        
+            
             {/* Floating element */}
             {isOpen && (
                 
@@ -131,6 +149,7 @@ const Autocomplete  =<T extends object | string,> ({
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
                     >
                     {renderOption ? renderOption(option) : 'option.toString()'}
+
                     </div>
                 
                 ))}
