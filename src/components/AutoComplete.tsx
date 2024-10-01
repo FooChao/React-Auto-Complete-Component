@@ -39,6 +39,7 @@ const Autocomplete  =<T extends object | string,> ({
     const [selected, setSelected] = useState<T[]>(Array.isArray(value) ? value : [value]);
     const [filteredOptions, setFilteredOptions] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [active, setActive] = useState<number>(-1); // -1 to indicate nothing
 
     const { x, y, refs, strategy } = useFloating({
         placement: 'bottom-start', // Position the floating UI below the input
@@ -71,6 +72,7 @@ const Autocomplete  =<T extends object | string,> ({
     let handler : number | undefined;
 
     const handleInputChange = (e : React.ChangeEvent<HTMLInputElement> )  => {
+        setIsOpen(true);
         if (handler) {
             clearTimeout(handler);
             setIsLoading(false)
@@ -104,6 +106,41 @@ const Autocomplete  =<T extends object | string,> ({
         }, 100);
     }
 
+    const handleKeyDown = (e : React.KeyboardEvent<HTMLInputElement> ) => {
+        if (!isOpen) {
+            return;
+        }
+        switch (e.key) {
+            case 'ArrowUp':
+                if (active === -1) {
+                    setActive(filteredOptions.length - 1);
+                } else if (active === 0){
+                    setActive(filteredOptions.length - 1);
+                } else {
+                    setActive(active - 1);
+                }
+                break;
+            case 'ArrowDown':
+                if (active === -1) {
+                    setActive(0);
+                } else if (active === filteredOptions.length - 1){
+                    setActive(0);
+                } else {
+                    setActive(active + 1);
+                }
+                break;              
+            case 'Enter':
+                handleOptionClick(filteredOptions[active]);
+                break;            
+            case 'Escape':
+                setActive(-1);
+                setIsOpen(false);
+                break;
+            default:
+                break;
+        }
+    }
+
     useEffect(() => {
         if (refs.reference.current) {
             const referenceElement = refs.reference.current as HTMLInputElement;
@@ -123,9 +160,13 @@ const Autocomplete  =<T extends object | string,> ({
                 className= 'mx-0 border-gray-300 border-2 rounded-md px-3 py-2 w-full pl-8' 
                 disabled = {disabled} 
                 placeholder= {placeholder} 
-                onFocus={()=>setIsOpen(true)} 
-                onBlur={()=>setIsOpen(false)} 
+                //onFocus={()=>setIsOpen(true)} 
+                onBlur={()=>{
+                    setIsOpen(false);
+                    setActive(-1);
+                }}
                 onChange={(e) => handleInputChange(e)}
+                onKeyDown={(e) => handleKeyDown(e)}
                 ref = {refs.setReference}
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -165,8 +206,11 @@ const Autocomplete  =<T extends object | string,> ({
                 {filteredOptions.map((option, index) => (
                     <div
                     key={index}
-                    className="p-2 hover:bg-blue-100 cursor-pointer rounded flex flex-row"
+                    className={index === active 
+                        ? "p-2 bg-blue-100 cursor-pointer rounded flex flex-row" 
+                        : "p-2 hover:bg-blue-100 cursor-pointer rounded flex flex-row"}
                     onClick={() => handleOptionClick(option)}
+                    onMouseEnter={() => setActive(-1)}
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur event when clicking inside the dropdown
                     >
                         <input
