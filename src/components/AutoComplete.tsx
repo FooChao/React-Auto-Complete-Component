@@ -17,6 +17,7 @@ interface AutocompleteProps<T extends object | string> {
     placeholder: string;
     renderOption?: (option: T) => React.ReactNode;
     value: T | Array<T>;
+    isSynchronous : boolean;
 }
    
 
@@ -31,7 +32,8 @@ const Autocomplete  =<T extends object | string,> ({
     options, 
     placeholder, 
     renderOption, 
-    value 
+    value,
+    isSynchronous 
   }: AutocompleteProps<T>) : JSX.Element =>  {
     const [isOpen, setIsOpen] = useState(false);
     const [inputWidth, setInputWidth] = useState<number | null>(null);
@@ -77,8 +79,7 @@ const Autocomplete  =<T extends object | string,> ({
             setIsLoading(false)
         } 
         const inputValue = e.target.value;
-        handler = setTimeout(() => handleInputChangeHelper(inputValue) , 1000);
-        
+        handler = setTimeout(() => handleInputChangeHelper(inputValue) , isSynchronous ? 0 : 1000);        
     }
 
     const handleInputChangeHelper = (inputValue : string)  => {

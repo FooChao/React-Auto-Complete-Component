@@ -21,9 +21,7 @@ const App = () => {
     return <div my-auto>{option}</div>;
   }
   let value : string[] = ["aa"];
-
-
-
+  let isSynchronous : boolean = false;
 
   return (
     <Autocomplete 
@@ -37,6 +35,7 @@ const App = () => {
       placeholder={placeholder}
       renderOption={renderOption}
       value = {value}
+      isSynchronous = {isSynchronous}
     />
   )
 }
